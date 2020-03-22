@@ -1,7 +1,7 @@
 #
 # Students' Makefile for the Malloc Lab
 #
-STUID = 2018000000
+STUID = 2017202090
 # ! Change the STUID to your own student ID
 VERSION = 1
 # ! Update the VERSION everytime you handin
