@@ -48,7 +48,7 @@ team_t team = {
 
 // #define SIZE_T_SIZE (ALIGN(sizeof(size_t)))
 
-
+ 
 /* 
  * mm_init - initialize the malloc package.
  */
@@ -88,7 +88,7 @@ void *find_fit(size_t newsize){
     size_t size = info & -2;
     while(info != 1){
         // 判断当前块为空闲块且够用
-        //printf("current free block address: %p, info: %d\n", heap_listp, info);
+        // printf("current free block address: %p, info: %d\n", heap_listp, info);
 
         if( (!(info & 1)) && (newsize <= size) ){
             free_hp = heap_listp;
@@ -101,54 +101,7 @@ void *find_fit(size_t newsize){
     return (void *)free_hp;
 }
 
-void *extend_heap(){
-    // endblock 变为新的CHUNCK的头 CHUNCKSIZE
-    char *end_p = (char *)mem_heap_hi() + 1 - WSIZE;
-    *(size_t *)end_p = CHUNKSIZE;
-    if(((char *)mem_sbrk(CHUNKSIZE)) == (char *)-1) 
-        return -1;
-    char *new_end_p = end_p + CHUNKSIZE;
-    *(size_t *)(new_end_p - WSIZE) = CHUNKSIZE;
-    *(size_t *)new_end_p = 1;
-    return (void *)(end_p + WSIZE);
-}
-
-/* 
- * mm_malloc - Allocate a block by incrementing the brk pointer.
- *     Always allocate a block whose size is a multiple of the alignment.
- */
-void *mm_malloc(size_t size)
-{
-    size_t newsize = ALIGN(size + 2*WSIZE);
-    // header pointer 确保返回的空闲块要足够大
-    char *hp = (char *)find_fit(newsize);
-    while(hp == NULL){
-        //sbrk分配并更新hp为新分配的大空闲块的header pointer
-        if((hp = (char *)extend_heap()) == (char *)-1) 
-            return -1;
-        mm_free(hp);
-        hp = (char *)find_fit(newsize);
-    }
-    size_t free_size = *(size_t *)hp;
-
-    *((size_t *)hp) = newsize | 1;
-    *((size_t *) (hp + newsize - WSIZE) ) = newsize | 1;
-    if(newsize <= free_size-2){
-        //更改剩余空闲块header
-        *(size_t *)(hp + newsize) = free_size - newsize;
-        // 更改剩余空闲块footer
-        *(size_t *)(hp + free_size - WSIZE) = free_size - newsize;
-    }
-    //printf("malloc: size: %d, address: %p, info: %d\n", newsize, (void *)(hp + WSIZE), *(size_t *)(hp));
-
-
-    return (void *)(hp + WSIZE);
-}
-
-/*
- * mm_free - Freeing a block does nothing.
- */
-void mm_free(void *ptr)
+void *coalesce(void *ptr)
 {
     char *hp = (char *)ptr - WSIZE;
     size_t size = (*(size_t *)hp) & -2;
@@ -169,8 +122,62 @@ void mm_free(void *ptr)
     // 更改空闲块header
     *((size_t *)hp) = total_size;
     // 更改空闲块footer
-    *( (size_t *) ((char *)hp + total_size - WSIZE) ) = total_size;
+    *( (size_t *) (hp + total_size - WSIZE) ) = total_size;
+    return (void *)hp;
+}
 
+void *extend_heap(){
+    // endblock 变为新的CHUNCK的头 CHUNCKSIZE
+    char *end_p = (char *)mem_heap_hi() + 1 - WSIZE;
+    *(size_t *)end_p = CHUNKSIZE;
+    if(((char *)mem_sbrk(CHUNKSIZE)) == (char *)-1) 
+        return -1;
+    char *new_end_p = end_p + CHUNKSIZE;
+    *(size_t *)(new_end_p - WSIZE) = CHUNKSIZE;
+    *(size_t *)new_end_p = 1;
+    void * hp = coalesce(end_p + WSIZE);
+    return (void *)hp;
+}
+
+/* 
+ * mm_malloc - Allocate a block by incrementing the brk pointer.
+ *     Always allocate a block whose size is a multiple of the alignment.
+ */
+void *mm_malloc(size_t size)
+{
+    size_t newsize = ALIGN(size + 2*WSIZE);
+    // header pointer 确保返回的空闲块要足够大
+    char *hp = (char *)find_fit(newsize);
+    while(hp == NULL){
+        //sbrk分配并更新hp为新分配的大空闲块的header pointer
+        if((hp = (char *)extend_heap()) == (char *)-1) 
+            return -1;
+        if(*(size_t *)hp > newsize){
+            break;
+        }
+        hp = NULL;
+    }
+    size_t free_size = *(size_t *)hp;
+
+    *((size_t *)hp) = newsize | 1;
+    *((size_t *) (hp + newsize - WSIZE) ) = newsize | 1;
+    if(newsize <= free_size-2){
+        //更改剩余空闲块header
+        *(size_t *)(hp + newsize) = free_size - newsize;
+        // 更改剩余空闲块footer
+        *(size_t *)(hp + free_size - WSIZE) = free_size - newsize;
+    }
+    //printf("malloc: size: %d, address: %p, info: %d\n", newsize, (void *)(hp + WSIZE), *(size_t *)(hp));
+    return (void *)(hp + WSIZE);
+}
+
+
+/*
+ * mm_free - Freeing a block does nothing.
+ */
+void mm_free(void *ptr)
+{
+    coalesce(ptr);
     //printf("free: size: %d, address: %p\n", size, (void *)hp - WSIZE);
 }
 

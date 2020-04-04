@@ -13,7 +13,7 @@
  * default tracefiles. You can override it at runtime with the -t flag.
  */
 //#define TRACEDIR "/home/handin-malloc/traces/"
-#define TRACEDIR "../traces/"
+#define TRACEDIR "./traces/"
 /*
  * This is the list of default tracefiles in TRACEDIR that the driver
  * will use for testing. Modify this if you want to add or delete
@@ -23,8 +23,6 @@
  */
 /*
 #define DEFAULT_TRACEFILES \
-  "short1-bal.rep", \
-  "short2-bal.rep"
 */
 #define DEFAULT_TRACEFILES \
   "amptjp-bal.rep",\
@@ -37,7 +35,9 @@
   "binary-bal.rep",\
   "binary2-bal.rep",\
   "realloc-bal.rep",\
-  "realloc2-bal.rep"
+  "realloc2-bal.rep",\
+  "short1-bal.rep",\
+  "short2-bal.rep"
 
 
 /*
