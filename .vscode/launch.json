@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "make",
+      "name": "gdb make ",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/mdriver",
@@ -22,7 +22,7 @@
           "ignoreFailures": true
         }
       ],
-      "preLaunchTask": "make",
+      "preLaunchTask": "build",
       "miDebuggerPath": "/usr/bin/gdb"
     }
   ]

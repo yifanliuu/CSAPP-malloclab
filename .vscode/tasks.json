@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
       {
-          "label": "make",   //这里是任务名，需要在launch.json中被调用
+          "label": "build",   //这里是任务名，需要在launch.json中被调用
           "command": "make", //这里是需要运行的命令，传参在下面一行进行
                              //不能在这一行直接传参，也就是不能写"command": "make all"
                              //注意自己写的make中gcc要加-g生成调试信息，否则无法调试
