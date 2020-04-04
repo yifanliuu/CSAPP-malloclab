@@ -196,6 +196,7 @@ void *coalesce(void *ptr)
     char *link_list_head = *(size_t *)((char *)mem_heap_lo() + WSIZE);
 
     //如果链表头是上一个空闲块，那么合并后的空闲块设置为表头
+    /*
     if(link_list_head == hp){
         return (void *)hp;
     }
@@ -206,6 +207,7 @@ void *coalesce(void *ptr)
         change_free_list_head(hp);
         return (void *)hp;
     }
+    */
 
     // 更改hp的两个指针
     *(size_t *)(hp + WSIZE) = NULL;
