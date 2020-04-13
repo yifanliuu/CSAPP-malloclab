@@ -21,9 +21,8 @@
  * your students to implement realloc, you can delete the last two
  * traces.
  */
-/*
-#define DEFAULT_TRACEFILES \
-*/
+
+
 #define DEFAULT_TRACEFILES \
   "short1-bal.rep",\
   "short2-bal.rep",\
